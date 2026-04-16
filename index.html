@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Family Trip Intake — Tokyo & Philippines</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --border: #ddd;
+  --bg: #f7f7f5;
+  --white: #fff;
+  --muted: #555;
+  --subtle: #888;
+  --ink: #1a1a1a;
+}
+
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--ink); line-height: 1.6; min-height: 100vh; }
+
+.trip-tabs { display: flex; border-bottom: 2px solid var(--border); background: var(--white); position: sticky; top: 0; z-index: 10; }
+.trip-tab { flex: 1; padding: 14px 10px; text-align: center; font-size: 14px; font-weight: 500; cursor: pointer; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; user-select: none; }
+.trip-tab .tab-flag { display: block; font-size: 22px; margin-bottom: 2px; }
+.trip-tab .tab-label { display: block; font-size: 12px; }
+.trip-tab.active-tokyo { color: #991b1b; border-bottom-color: #991b1b; }
+.trip-tab.active-ph { color: #0D6B66; border-bottom-color: #0D6B66; }
+.trip-tab:not(.active-tokyo):not(.active-ph):hover { background: #f5f5f5; }
+
+.trip-section { display: none; }
+.trip-section.visible { display: block; }
+
+.hero-tokyo { background: #991b1b; padding: 36px 20px 28px; text-align: center; }
+.hero-ph { background: #0D6B66; padding: 36px 20px 28px; text-align: center; }
+.hero-flag { font-size: 44px; display: block; margin-bottom: 10px; }
+.hero h1 { font-size: 24px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+.hero-dates { font-size: 13px; margin-bottom: 2px; }
+.hero-tagline { font-size: 12px; opacity: 0.8; font-style: italic; }
+.hero-tokyo .hero-dates, .hero-tokyo .hero-tagline { color: #FCA5A5; }
+.hero-ph .hero-dates, .hero-ph .hero-tagline { color: #9FE1CB; }
+
+.progress-bar { height: 4px; }
+.progress-fill { height: 4px; transition: width 0.4s; width: 0%; }
+.tokyo-prog { background: #7F1D1D; }
+.tokyo-prog .progress-fill { background: #FCD34D; }
+.ph-prog { background: #085041; }
+.ph-prog .progress-fill { background: #FAC775; }
+
+.container { max-width: 680px; margin: 0 auto; padding: 0 18px 60px; }
+
+.intro-box { padding: 12px 16px; margin: 18px 0 4px; border-radius: 0 8px 8px 0; font-size: 13px; color: var(--ink); line-height: 1.6; }
+.intro-tokyo { background: #FEF2F2; border-left: 3px solid #991b1b; }
+.intro-ph { background: #FAEEDA; border-left: 3px solid #B45309; }
+.intro-tokyo strong { color: #991b1b; }
+.intro-ph strong { color: #B45309; }
+
+.sec-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 10px; display: flex; align-items: center; gap: 8px; }
+.sec-label-tokyo { color: #991b1b; }
+.sec-label-tokyo::after { content:''; flex:1; height:1px; background:#FCA5A5; opacity:0.6; }
+.sec-label-ph { color: #0D6B66; }
+.sec-label-ph::after { content:''; flex:1; height:1px; background:#9FE1CB; opacity:0.6; }
+
+.card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin-bottom: 10px; }
+.q-label { font-size: 13px; font-weight: 500; color: var(--ink); display: block; margin-bottom: 2px; }
+.q-hint { font-size: 11px; color: var(--subtle); display: block; margin-bottom: 8px; font-style: italic; }
+
+.pill-group { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 6px; }
+.pill { border: 1px solid var(--border); border-radius: 20px; padding: 5px 13px; font-size: 12px; color: var(--muted); background: var(--white); cursor: pointer; transition: all 0.15s; user-select: none; }
+
+.tokyo-pill:hover { border-color: #991b1b; color: #991b1b; background: #FEF2F2; }
+.tokyo-pill.selected { border-color: #991b1b; background: #FEF2F2; color: #7F1D1D; font-weight: 500; }
+.ph-pill:hover { border-color: #0D6B66; color: #0D6B66; background: #E1F5EE; }
+.ph-pill.selected { border-color: #0D6B66; background: #E1F5EE; color: #085041; font-weight: 500; }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-top: 8px; }
+.opt-card { border: 1px solid var(--border); border-radius: 8px; padding: 12px 8px; background: var(--white); cursor: pointer; text-align: center; transition: all 0.15s; user-select: none; }
+.opt-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+.opt-title { font-size: 12px; font-weight: 500; color: var(--ink); display: block; }
+.opt-sub { font-size: 10px; color: var(--subtle); display: block; margin-top: 2px; }
+.tokyo-card:hover { border-color: #991b1b; background: #FEF2F2; }
+.tokyo-card.selected { border-color: #991b1b; background: #FEF2F2; }
+.tokyo-card.selected .opt-title { color: #7F1D1D; }
+.ph-card:hover { border-color: #0D6B66; background: #E1F5EE; }
+.ph-card.selected { border-color: #0D6B66; background: #E1F5EE; }
+.ph-card.selected .opt-title { color: #085041; }
+
+textarea, input[type="text"] { width: 100%; border: 1px solid var(--border); border-radius: 7px; padding: 8px 11px; font-size: 12px; font-family: inherit; color: var(--ink); background: var(--bg); resize: vertical; transition: border-color 0.15s; }
+textarea { min-height: 64px; }
+textarea:focus, input[type="text"]:focus { outline: none; background: var(--white); }
+.tokyo-focus:focus { border-color: #991b1b; }
+.ph-focus:focus { border-color: #0D6B66; }
+
+.submit-btn { color: #fff; border: none; border-radius: 9px; padding: 13px 32px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 24px; transition: opacity 0.15s; }
+.submit-btn:hover { opacity: 0.88; }
+.tokyo-btn { background: #991b1b; }
+.ph-btn { background: #0D6B66; }
+.submit-note { font-size: 11px; color: var(--subtle); text-align: center; margin-top: 7px; }
+
+.results { display: none; padding: 24px 18px 60px; max-width: 680px; margin: 0 auto; }
+.results.active { display: block; }
+.form-body.hidden { display: none; }
+
+.check-circle { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 22px; }
+.check-tokyo { background: #FEF2F2; color: #991b1b; }
+.check-ph { background: #E1F5EE; color: #0D6B66; }
+.result-title { font-size: 20px; font-weight: 600; text-align: center; margin-bottom: 4px; }
+.result-sub { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 18px; }
+.name-badge { display: inline-block; font-weight: 500; font-size: 13px; padding: 3px 14px; border-radius: 20px; margin-bottom: 14px; }
+.badge-tokyo { background: #FEF2F2; color: #7F1D1D; }
+.badge-ph { background: #E1F5EE; color: #085041; }
+
+.result-sec h3 { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; margin: 14px 0 6px; }
+.result-sec-tokyo h3 { color: #991b1b; }
+.result-sec-ph h3 { color: #0D6B66; }
+.result-row { display: flex; gap: 8px; font-size: 12px; padding: 7px 11px; background: var(--white); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 4px; align-items: flex-start; }
+.r-label { color: var(--subtle); min-width: 115px; flex-shrink: 0; }
+.r-val { font-weight: 500; color: var(--ink); }
+
+.copy-box { background: #f0f0ee; border: 1px solid var(--border); border-radius: 7px; padding: 12px 14px; font-size: 11px; font-family: monospace; white-space: pre-wrap; word-break: break-word; color: var(--ink); margin: 10px 0 8px; }
+.copy-btn { color: #fff; border: none; border-radius: 7px; padding: 9px 20px; font-size: 12px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; }
+.copy-btn:hover { opacity: 0.85; }
+.copy-btn.copied { opacity: 0.7; }
+.tokyo-copy { background: #991b1b; }
+.ph-copy { background: #0D6B66; }
+.another-btn { background: transparent; border: 1px solid var(--border); border-radius: 7px; padding: 9px 20px; font-size: 12px; font-weight: 500; cursor: pointer; margin-left: 8px; color: var(--muted); transition: all 0.15s; }
+.another-btn:hover { background: #f0f0f0; }
+.info-note { border-radius: 8px; padding: 10px 14px; font-size: 11px; margin-top: 14px; line-height: 1.6; }
+.info-tokyo { background: #FEF2F2; color: #7F1D1D; }
+.info-ph { background: #E1F5EE; color: #085041; }
+
+@media (max-width: 480px) {
+  .card-grid { grid-template-columns: 1fr 1fr; }
+  .hero h1 { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="trip-tabs">
+  <div class="trip-tab active-tokyo" id="tab-tokyo" onclick="switchTrip('tokyo')">
+    <span class="tab-flag">🗾</span>
+    <span class="tab-label">Tokyo</span>
+  </div>
+  <div class="trip-tab" id="tab-ph" onclick="switchTrip('ph')">
+    <span class="tab-flag">🇵🇭</span>
+    <span class="tab-label">Philippines</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ TOKYO ═══════════════════════════ -->
+<div class="trip-section visible" id="section-tokyo">
+  <div class="form-body" id="form-tokyo">
+    <div class="hero-tokyo">
+      <span class="hero-flag">🗾</span>
+      <h1>Tokyo Family Trip</h1>
+      <div class="hero-dates">Thursday–Monday · 4 Days in Tokyo</div>
+      <div class="hero-tagline">Culture • Food • Shopping • Disney • Mt. Fuji</div>
+    </div>
+    <div class="progress-bar tokyo-prog"><div class="progress-fill" id="prog-tokyo"></div></div>
+    <div class="container">
+      <div class="intro-box intro-tokyo"><strong>How this works:</strong> Answer a few quick questions about what you want to do in Tokyo. Takes ~3 min. Copy your results and send back to the trip organizer to help finalize the itinerary!</div>
+
+      <div class="sec-label sec-label-tokyo">About you</div>
+      <div class="card">
+        <span class="q-label">What's your name?</span>
+        <input type="text" id="t-name" class="tokyo-focus" placeholder="First name or nickname..." maxlength="40">
+      </div>
+      <div class="card">
+        <span class="q-label">Age group?</span>
+        <div class="pill-group" data-g="t-age" data-m="false">
+          <div class="pill tokyo-pill" data-v="Under 12">Under 12</div>
+          <div class="pill tokyo-pill" data-v="Teen (12–17)">Teen (12–17)</div>
+          <div class="pill tokyo-pill" data-v="Adult (18–39)">Adult (18–39)</div>
+          <div class="pill tokyo-pill" data-v="Adult (40–59)">Adult (40–59)</div>
+          <div class="pill tokyo-pill" data-v="60+">60+</div>
+        </div>
+      </div>
+
+      <div class="sec-label sec-label-tokyo">Day trips & experiences</div>
+      <div class="card">
+        <span class="q-label">Disney — are you in?</span>
+        <span class="q-hint">Half the group wants to go — we're considering splitting the day</span>
+        <div class="pill-group" data-g="t-disney" data-m="false">
+          <div class="pill tokyo-pill" data-v="Yes — full day Disney">Yes — full day Disney</div>
+          <div class="pill tokyo-pill" data-v="Yes — half day Disney">Yes — half day only</div>
+          <div class="pill tokyo-pill" data-v="I'd rather do something else">Skip — I'll do something else</div>
+          <div class="pill tokyo-pill" data-v="No preference">No preference</div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="q-label">Mt. Fuji + Hakone day trip — interested?</span>
+        <span class="q-hint">~11 hr guided day. Fuji 5th Station, Lake Ashi cruise, Hakone Ropeway, Shinkansen return</span>
+        <div class="pill-group" data-g="t-fuji" data-m="false">
+          <div class="pill tokyo-pill" data-v="Yes — must do this">Yes — must do this</div>
+          <div class="pill tokyo-pill" data-v="Yes if the group agrees">Yes if group agrees</div>
+          <div class="pill tokyo-pill" data-v="Maybe — I'm on the fence">On the fence</div>
+          <div class="pill tokyo-pill" data-v="I'd rather stay in Tokyo">Stay in Tokyo</div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="q-label">TeamLab Borderless — interested?</span>
+        <span class="q-hint">Immersive digital art museum — rooms of living, moving light. Must book tickets in advance.</span>
+        <div class="pill-group" data-g="t-teamlab" data-m="false">
+          <div class="pill tokyo-pill" data-v="Yes — definitely want to go">Yes — definitely</div>
+          <div class="pill tokyo-pill" data-v="Sounds interesting, maybe">Maybe</div>
+          <div class="pill tokyo-pill" data-v="Not really my thing">Not for me</div>
+          <div class="pill tokyo-pill" data-v="No preference">No preference</div>
+        </div>
+      </div>
+
+      <div class="sec-label sec-label-tokyo">Shopping</div>
+      <div class="card">
+        <span class="q-label">What kind of shopping matters most to you?</span>
+        <span class="q-hint">Select all that apply</span>
+        <div class="card-grid" data-g="t-shop" data-m="true">
+          <div class="opt-card tokyo-card" data-v="Fashion / Uniqlo / streetwear"><span class="opt-icon">👕</span><span class="opt-title">Fashion / Uniqlo</span><span class="opt-sub">Harajuku, streetwear</span></div>
+          <div class="opt-card tokyo-card" data-v="Luxury / designer brands"><span class="opt-icon">💎</span><span class="opt-title">Luxury brands</span><span class="opt-sub">Ginza, Chanel, LV</span></div>
+          <div class="opt-card tokyo-card" data-v="Vintage luxury consignment"><span class="opt-icon">👜</span><span class="opt-title">Vintage luxury</span><span class="opt-sub">Komehyo, Omotesando</span></div>
+          <div class="opt-card tokyo-card" data-v="Japanese knives / kitchenware"><span class="opt-icon">🔪</span><span class="opt-title">Knives / kitchen</span><span class="opt-sub">Kappabashi</span></div>
+          <div class="opt-card tokyo-card" data-v="Souvenirs & gifts"><span class="opt-icon">🎁</span><span class="opt-title">Souvenirs & gifts</span><span class="opt-sub">Nakamise, markets</span></div>
+          <div class="opt-card tokyo-card" data-v="Electronics / gadgets"><span class="opt-icon">🎮</span><span class="opt-title">Electronics</span><span class="opt-sub">Akihabara</span></div>
+          <div class="opt-card tokyo-card" data-v="Jewelry / accessories"><span class="opt-icon">💍</span><span class="opt-title">Jewelry</span><span class="opt-sub">Ameyoko market</span></div>
+          <div class="opt-card tokyo-card" data-v="Shopping isn't a priority for me"><span class="opt-icon">🤷</span><span class="opt-title">Not a priority</span><span class="opt-sub">Happy to tag along</span></div>
+        </div>
+      </div>
+
+      <div class="sec-label sec-label-tokyo">Culture & sightseeing</div>
+      <div class="card">
+        <span class="q-label">Which cultural activities interest you most?</span>
+        <span class="q-hint">Select all that apply</span>
+        <div class="card-grid" data-g="t-culture" data-m="true">
+          <div class="opt-card tokyo-card" data-v="Senso-ji Temple, Asakusa"><span class="opt-icon">⛩️</span><span class="opt-title">Senso-ji</span><span class="opt-sub">Temple & Nakamise</span></div>
+          <div class="opt-card tokyo-card" data-v="Tokyo National Museum"><span class="opt-icon">🏯</span><span class="opt-title">National Museum</span><span class="opt-sub">Samurai, ceramics</span></div>
+          <div class="opt-card tokyo-card" data-v="Shibuya Crossing & Harajuku"><span class="opt-icon">🌆</span><span class="opt-title">Shibuya / Harajuku</span><span class="opt-sub">Iconic crossing</span></div>
+          <div class="opt-card tokyo-card" data-v="Tsukiji Outer Market"><span class="opt-icon">🐟</span><span class="opt-title">Tsukiji Market</span><span class="opt-sub">Sushi breakfast</span></div>
+          <div class="opt-card tokyo-card" data-v="Ameyoko Market, Ueno"><span class="opt-icon">🛍️</span><span class="opt-title">Ameyoko Market</span><span class="opt-sub">Bargain & street food</span></div>
+          <div class="opt-card tokyo-card" data-v="Shinjuku neighborhood"><span class="opt-icon">🏙️</span><span class="opt-title">Shinjuku</span><span class="opt-sub">Memory Lane, food</span></div>
+        </div>
+      </div>
+
+      <div class="sec-label sec-label-tokyo">Food & logistics</div>
+      <div class="card">
+        <span class="q-label">What Japanese food are you most excited about?</span>
+        <div class="pill-group" data-g="t-food" data-m="true">
+          <div class="pill tokyo-pill" data-v="Sushi / sashimi">Sushi / sashimi</div>
+          <div class="pill tokyo-pill" data-v="Ramen">Ramen</div>
+          <div class="pill tokyo-pill" data-v="Wagyu beef / yakiniku">Wagyu / yakiniku</div>
+          <div class="pill tokyo-pill" data-v="Izakaya (Japanese pub)">Izakaya</div>
+          <div class="pill tokyo-pill" data-v="Street food & snacks">Street snacks</div>
+          <div class="pill tokyo-pill" data-v="Soba / udon">Soba / udon</div>
+          <div class="pill tokyo-pill" data-v="I'll eat anything!">Everything!</div>
+          <div class="pill tokyo-pill" data-v="I'm a picky eater">Picky eater</div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="q-label">Any dietary restrictions or allergies?</span>
+        <textarea id="t-diet" class="tokyo-focus" placeholder="e.g. shellfish allergy, vegetarian, gluten-free... or leave blank"></textarea>
+      </div>
+      <div class="card">
+        <span class="q-label">How much walking / activity per day?</span>
+        <div class="card-grid" data-g="t-activity" data-m="false">
+          <div class="opt-card tokyo-card" data-v="Easy — lots of breaks"><span class="opt-icon">🐢</span><span class="opt-title">Easy</span><span class="opt-sub">Rest & short walks</span></div>
+          <div class="opt-card tokyo-card" data-v="Moderate — a few miles is fine"><span class="opt-icon">🚶</span><span class="opt-title">Moderate</span><span class="opt-sub">A few miles/day</span></div>
+          <div class="opt-card tokyo-card" data-v="Active — I can go all day"><span class="opt-icon">🏃</span><span class="opt-title">Active</span><span class="opt-sub">Full days, no problem</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="q-label">Anything you really want to do that isn't listed?</span>
+        <textarea id="t-wish" class="tokyo-focus" placeholder="e.g. ninja experience, anime shops, sumo match, specific restaurant, robot restaurant..."></textarea>
+      </div>
+      <div class="card">
+        <span class="q-label">Anything you'd like to skip or are worried about?</span>
+        <textarea id="t-skip" class="tokyo-focus" placeholder="No judgment — museums, long walks, crowded places?"></textarea>
+      </div>
+
+      <button class="submit-btn tokyo-btn" onclick="submitForm('tokyo')">Submit my Tokyo preferences</button>
+      <div class="submit-note">Results appear below — copy & send to the trip organizer</div>
+    </div>
+  </div>
+
+  <div class="results" id="res-tokyo">
+    <div class="check-circle check-tokyo">✓</div>
+    <div class="result-title">Tokyo preferences saved!</div>
+    <div class="result-sub">Copy the text below and send it to the trip organizer.</div>
+    <div id="rName-tokyo"></div>
+    <div id="rSections-tokyo"></div>
+    <div style="font-size:12px;color:var(--muted);font-weight:500;margin-bottom:6px;">Copy & send this:</div>
+    <div class="copy-box" id="cBox-tokyo"></div>
+    <button class="copy-btn tokyo-copy" id="cBtn-tokyo" onclick="copyText('tokyo')">Copy to clipboard</button>
+    <button class="another-btn" onclick="resetForm('tokyo')">Submit another person</button>
+    <div class="info-note info-tokyo">Also fill out the Philippines tab if you're going on that trip too! 🇵🇭</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ PHILIPPINES ═══════════════════════════ -->
+<div class="trip-section" id="section-ph">
+  <div class="form-body" id="form-ph">
+    <div class="hero-ph">
+      <span class="hero-flag">🇵🇭</span>
+      <h1>Philippines Family Trip</h1>
+      <div class="hero-dates">August 10–21 · Santa Rosa, Manila, Tagaytay & Bohol</div>
+      <div class="hero-tagline">Culture • Food • Beaches • Bohol • Filipino Heritage</div>
+    </div>
+    <div class="progress-bar ph-prog"><div class="progress-fill" id="prog-ph"></div></div>
+    <div class="container">
+      <div class="intro-box intro-ph"><strong>How this works:</strong> Answer a few quick questions about the Philippines trip. Takes ~3 min. Copy your results and send back to the trip organizer!</div>
+
+      <div class="sec-label sec-label-ph">About you</div>
+      <div class="card">
+        <span class="q-label">What's your name?</span>
+        <input type="text" id="p-name" class="ph-focus" placeholder="First name or nickname..." maxlength="40">
+      </div>
+      <div class="card">
+        <span class="q-label">Age group?</span>
+        <div class="pill-group" data-g="p-age" data-m="false">
+          <div class="pill ph-pill" data-v="Under 12">Under 12</div>
+          <div class="pill ph-pill" data-v="Teen (12–17)">Teen (12–17)</div>
+          <div class="pill ph-pill" data-v="Adult (18–39)">Adult (18–39)</div>
+          <div class="pill ph-pill" data-v="Adult (40–59)">Adult (40–59)</div>
+          <div class="pill ph-pill" data-v="60+">60+</div>
+        </div>
+      </div>
+
+      <div class="sec-label sec-label-ph">Week 1 — Luzon (Santa Rosa base)</div>
+      <div class="card">
+        <span class="q-label">Which Luzon day trips excite you most?</span>
+        <span class="q-hint">Select all that apply — Santa Rosa is ~40 min from Manila, 39 min from Tagaytay</span>
+        <div class="card-grid" data-g="p-luzon" data-m="true">
+          <div class="opt-card ph-card" data-v="Manila history & culture"><span class="opt-icon">🏛️</span><span class="opt-title">Manila history</span><span class="opt-sub">Intramuros, Rizal Park</span></div>
+          <div class="opt-card ph-card" data-v="Tagaytay & Taal Volcano"><span class="opt-icon">🌋</span><span class="opt-title">Tagaytay & Taal</span><span class="opt-sub">Volcano views, bulalo</span></div>
+          <div class="opt-card ph-card" data-v="Batangas beach / snorkeling"><span class="opt-icon">🏖️</span><span class="opt-title">Batangas beach</span><span class="opt-sub">Anilao, Nasugbu</span></div>
+          <div class="opt-card ph-card" data-v="Laguna hot springs"><span class="opt-icon">♨️</span><span class="opt-title">Laguna springs</span><span class="opt-sub">Mt. Makiling</span></div>
+          <div class="opt-card ph-card" data-v="Stay local / family time"><span class="opt-icon">🏘️</span><span class="opt-title">Stay local</span><span class="opt-sub">Family, NUVALI</span></div>
+          <div class="opt-card ph-card" data-v="No preference — whatever the group wants"><span class="opt-icon">🤷</span><span class="opt-title">No preference</span><span class="opt-sub">Happy with anything</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="q-label">Filipino clothing — Barong Tagalog or Filipiniana?</span>
+        <span class="q-hint">August is Buwan ng Wika (National Language Month) — shops are well-stocked</span>
+        <div class="card-grid" data-g="p-clothing" data-m="false">
+          <div class="opt-card ph-card" data-v="Yes — I want to buy one"><span class="opt-icon">👗</span><span class="opt-title">Yes — count me in</span><span class="opt-sub">I want one!</span></div>
+          <div class="opt-card ph-card" data-v="Maybe — I'll browse first"><span class="opt-icon">👀</span><span class="opt-title">Maybe — I'll look</span><span class="opt-sub">Depends what I see</span></div>
+          <div class="opt-card ph-card" data-v="Not for me"><span class="opt-icon">🙅</span><span class="opt-title">Not for me</span><span class="opt-sub">I'll skip this</span></div>
+        </div>
+      </div>
+
+      <div class="sec-label sec-label-ph">Week 2 — Bohol (strong maybe)</div>
+      <div class="card">
+        <span class="q-label">Should we go to Bohol for week 2?</span>
+        <span class="q-hint">~1 hr flight from Manila · Chocolate Hills, tarsiers, white sand beaches, diving</span>
+        <div class="pill-group" data-g="p-bohol" data-m="false">
+          <div class="pill ph-pill" data-v="Yes — 100% do it">Yes — 100% do it</div>
+          <div class="pill ph-pill" data-v="Yes if the family agrees">Yes if family agrees</div>
+          <div class="pill ph-pill" data-v="I'm neutral">Neutral</div>
+          <div class="pill ph-pill" data-v="I'd rather stay in Luzon">Stay in Luzon</div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="q-label">If we go to Bohol, what interests you?</span>
+        <span class="q-hint">Select all that apply</span>
+        <div class="card-grid" data-g="p-bact" data-m="true">
+          <div class="opt-card ph-card" data-v="Chocolate Hills"><span class="opt-icon">🏔️</span><span class="opt-title">Chocolate Hills</span><span class="opt-sub">Geological wonder</span></div>
+          <div class="opt-card ph-card" data-v="Tarsier sanctuary"><span class="opt-icon">🐒</span><span class="opt-title">Tarsier sanctuary</span><span class="opt-sub">World's smallest primate</span></div>
+          <div class="opt-card ph-card" data-v="Loboc River cruise"><span class="opt-icon">🚢</span><span class="opt-title">Loboc River</span><span class="opt-sub">Floating lunch</span></div>
+          <div class="opt-card ph-card" data-v="Panglao beach"><span class="opt-icon">🏄</span><span class="opt-title">Panglao beach</span><span class="opt-sub">White sand, snorkeling</span></div>
+          <div class="opt-card ph-card" data-v="Balicasag Island diving"><span class="opt-icon">🤿</span><span class="opt-title">Balicasag diving</span><span class="opt-sub">Sea turtles</span></div>
+          <div class="opt-card ph-card" data-v="Just relax on the beach"><span class="opt-icon">🌴</span><span class="opt-title">Just relax</span><span class="opt-sub">Beach & nothing</span></div>
+        </div>
+      </div>
+
+      <div class="sec-label sec-label-ph">Food & logistics</div>
+      <div class="card">
+        <span class="q-label">What Filipino food are you most excited to eat?</span>
+        <div class="pill-group" data-g="p-food" data-m="true">
+          <div class="pill ph-pill" data-v="Lechon (roast pig)">Lechon</div>
+          <div class="pill ph-pill" data-v="Sinigang">Sinigang</div>
+          <div class="pill ph-pill" data-v="Kare-kare">Kare-kare</div>
+          <div class="pill ph-pill" data-v="Bulalo (beef marrow soup)">Bulalo</div>
+          <div class="pill ph-pill" data-v="Fresh seafood">Fresh seafood</div>
+          <div class="pill ph-pill" data-v="Halo-halo">Halo-halo</div>
+          <div class="pill ph-pill" data-v="Street food & snacks">Street food</div>
+          <div class="pill ph-pill" data-v="I'll eat everything!">Everything!</div>
+          <div class="pill ph-pill" data-v="I'm a picky eater">Picky eater</div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="q-label">Any dietary restrictions or allergies?</span>
+        <textarea id="p-diet" class="ph-focus" placeholder="e.g. shellfish allergy, vegetarian, no pork... or leave blank"></textarea>
+      </div>
+      <div class="card">
+        <span class="q-label">How much activity can you handle per day?</span>
+        <div class="card-grid" data-g="p-activity" data-m="false">
+          <div class="opt-card ph-card" data-v="Easy — lots of breaks"><span class="opt-icon">🐢</span><span class="opt-title">Easy</span><span class="opt-sub">Rest & short walks</span></div>
+          <div class="opt-card ph-card" data-v="Moderate — a few miles is fine"><span class="opt-icon">🚶</span><span class="opt-title">Moderate</span><span class="opt-sub">One big thing/day</span></div>
+          <div class="opt-card ph-card" data-v="Active — I can go all day"><span class="opt-icon">🏃</span><span class="opt-title">Active</span><span class="opt-sub">Full days, no problem</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <span class="q-label">Anything you really want to do or see?</span>
+        <textarea id="p-wish" class="ph-focus" placeholder="Specific relatives, restaurants, experiences, hidden gems..."></textarea>
+      </div>
+      <div class="card">
+        <span class="q-label">Anything you'd like to skip or are worried about?</span>
+        <textarea id="p-skip" class="ph-focus" placeholder="No judgment — boats, long drives, heat, specific activities?"></textarea>
+      </div>
+
+      <button class="submit-btn ph-btn" onclick="submitForm('ph')">Submit my Philippines preferences</button>
+      <div class="submit-note">Results appear below — copy & send to the trip organizer</div>
+    </div>
+  </div>
+
+  <div class="results" id="res-ph">
+    <div class="check-circle check-ph">✓</div>
+    <div class="result-title">Philippines preferences saved!</div>
+    <div class="result-sub">Copy the text below and send it to the trip organizer.</div>
+    <div id="rName-ph"></div>
+    <div id="rSections-ph"></div>
+    <div style="font-size:12px;color:var(--muted);font-weight:500;margin-bottom:6px;">Copy & send this:</div>
+    <div class="copy-box" id="cBox-ph"></div>
+    <button class="copy-btn ph-copy" id="cBtn-ph" onclick="copyText('ph')">Copy to clipboard</button>
+    <button class="another-btn" onclick="resetForm('ph')">Submit another person</button>
+    <div class="info-note info-ph">Also fill out the Tokyo tab if you're going on that trip too! 🗾</div>
+  </div>
+</div>
+
+<script>
+function switchTrip(trip) {
+  document.querySelectorAll('.trip-section').forEach(s => s.classList.remove('visible'));
+  document.getElementById('section-' + trip).classList.add('visible');
+  document.querySelectorAll('.trip-tab').forEach(t => {
+    t.classList.remove('active-tokyo', 'active-ph');
+  });
+  document.getElementById('tab-' + trip).classList.add('active-' + trip);
+}
+
+function getSel(g) {
+  return Array.from(document.querySelectorAll(`[data-g="${g}"] .selected`))
+    .map(el => el.dataset.v || el.querySelector('.opt-title')?.textContent?.trim() || el.textContent.trim());
+}
+
+document.querySelectorAll('.pill').forEach(p => {
+  p.addEventListener('click', function() {
+    const grp = this.closest('[data-g]');
+    if (grp.dataset.m !== 'true') grp.querySelectorAll('.pill').forEach(x => x.classList.remove('selected'));
+    this.classList.toggle('selected');
+    updateProg(this.closest('.trip-section').id.replace('section-', ''));
+  });
+});
+
+document.querySelectorAll('.opt-card').forEach(c => {
+  c.addEventListener('click', function() {
+    const grp = this.closest('[data-g]');
+    if (grp.dataset.m !== 'true') grp.querySelectorAll('.opt-card').forEach(x => x.classList.remove('selected'));
+    this.classList.toggle('selected');
+    updateProg(this.closest('.trip-section').id.replace('section-', ''));
+  });
+});
+
+document.querySelectorAll('input[type="text"], textarea').forEach(el => {
+  el.addEventListener('input', function() {
+    const sec = this.closest('.trip-section');
+    if (sec) updateProg(sec.id.replace('section-', ''));
+  });
+});
+
+function updateProg(trip) {
+  if (trip === 'tokyo') {
+    const gs = ['t-age','t-disney','t-fuji','t-teamlab','t-shop','t-culture','t-food','t-activity'];
+    let f = document.getElementById('t-name').value.trim() ? 1 : 0;
+    gs.forEach(g => { if (getSel(g).length > 0) f++; });
+    document.getElementById('prog-tokyo').style.width = Math.round(f / (gs.length + 1) * 100) + '%';
+  } else {
+    const gs = ['p-age','p-luzon','p-clothing','p-bohol','p-bact','p-food','p-activity'];
+    let f = document.getElementById('p-name').value.trim() ? 1 : 0;
+    gs.forEach(g => { if (getSel(g).length > 0) f++; });
+    document.getElementById('prog-ph').style.width = Math.round(f / (gs.length + 1) * 100) + '%';
+  }
+}
+
+function submitForm(trip) {
+  if (trip === 'tokyo') {
+    const name = document.getElementById('t-name').value.trim() || 'Anonymous';
+    const d = {
+      name,
+      age: getSel('t-age').join(', ') || '—',
+      disney: getSel('t-disney').join(', ') || '—',
+      fuji: getSel('t-fuji').join(', ') || '—',
+      teamlab: getSel('t-teamlab').join(', ') || '—',
+      shop: getSel('t-shop').join(', ') || '—',
+      culture: getSel('t-culture').join(', ') || '—',
+      food: getSel('t-food').join(', ') || '—',
+      diet: document.getElementById('t-diet').value.trim() || 'None',
+      activity: getSel('t-activity').join(', ') || '—',
+      wish: document.getElementById('t-wish').value.trim() || 'Nothing specific',
+      skip: document.getElementById('t-skip').value.trim() || 'Nothing',
+    };
+    const rows = [
+      ['Age group', d.age], ['Disney?', d.disney], ['Mt. Fuji trip?', d.fuji],
+      ['TeamLab?', d.teamlab], ['Shopping interests', d.shop], ['Culture interests', d.culture],
+      ['Food interests', d.food], ['Dietary needs', d.diet], ['Activity level', d.activity],
+      ['Wish list', d.wish], ['Skip / concerns', d.skip]
+    ];
+    renderResults('tokyo', name, rows, 'badge-tokyo', 'result-sec-tokyo');
+    const txt = [`🗾 Tokyo Trip Intake — ${name}`, `─────────────────────────`, ...rows.map(([l,v]) => `${l}: ${v}`)].join('\n');
+    document.getElementById('cBox-tokyo').textContent = txt;
+    document.getElementById('form-tokyo').classList.add('hidden');
+    document.getElementById('res-tokyo').classList.add('active');
+    window.scrollTo(0,0);
+  } else {
+    const name = document.getElementById('p-name').value.trim() || 'Anonymous';
+    const d = {
+      name,
+      age: getSel('p-age').join(', ') || '—',
+      luzon: getSel('p-luzon').join(', ') || '—',
+      clothing: getSel('p-clothing').join(', ') || '—',
+      bohol: getSel('p-bohol').join(', ') || '—',
+      bact: getSel('p-bact').join(', ') || '—',
+      food: getSel('p-food').join(', ') || '—',
+      diet: document.getElementById('p-diet').value.trim() || 'None',
+      activity: getSel('p-activity').join(', ') || '—',
+      wish: document.getElementById('p-wish').value.trim() || 'Nothing specific',
+      skip: document.getElementById('p-skip').value.trim() || 'Nothing',
+    };
+    const rows = [
+      ['Age group', d.age], ['Luzon highlights', d.luzon], ['Filipino clothing', d.clothing],
+      ['Bohol — go?', d.bohol], ['Bohol activities', d.bact], ['Food interests', d.food],
+      ['Dietary needs', d.diet], ['Activity level', d.activity], ['Wish list', d.wish], ['Skip / concerns', d.skip]
+    ];
+    renderResults('ph', name, rows, 'badge-ph', 'result-sec-ph');
+    const txt = [`🇵🇭 Philippines Trip Intake — ${name}`, `─────────────────────────`, ...rows.map(([l,v]) => `${l}: ${v}`)].join('\n');
+    document.getElementById('cBox-ph').textContent = txt;
+    document.getElementById('form-ph').classList.add('hidden');
+    document.getElementById('res-ph').classList.add('active');
+    window.scrollTo(0,0);
+  }
+}
+
+function renderResults(trip, name, rows, badgeClass, secClass) {
+  document.getElementById('rName-' + trip).innerHTML = `<div class="name-badge ${badgeClass}">${name}</div>`;
+  document.getElementById('rSections-' + trip).innerHTML =
+    `<div class="result-sec ${secClass}"><h3>Your responses</h3>` +
+    rows.map(([l,v]) => `<div class="result-row"><span class="r-label">${l}</span><span class="r-val">${v}</span></div>`).join('') +
+    '</div>';
+}
+
+function copyText(trip) {
+  const txt = document.getElementById('cBox-' + trip).textContent;
+  const btn = document.getElementById('cBtn-' + trip);
+  navigator.clipboard.writeText(txt).then(() => {
+    btn.textContent = 'Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy to clipboard'; btn.classList.remove('copied'); }, 2000);
+  }).catch(() => {
+    const r = document.createRange(); r.selectNode(document.getElementById('cBox-' + trip));
+    window.getSelection().removeAllRanges(); window.getSelection().addRange(r);
+    document.execCommand('copy'); window.getSelection().removeAllRanges();
+  });
+}
+
+function resetForm(trip) {
+  const prefix = trip === 'tokyo' ? 't' : 'p';
+  document.getElementById(prefix + '-name').value = '';
+  document.getElementById(prefix + '-diet').value = '';
+  document.getElementById(prefix + '-wish') && (document.getElementById(prefix + '-wish').value = '');
+  document.getElementById(prefix + '-skip') && (document.getElementById(prefix + '-skip').value = '');
+  document.querySelectorAll('#section-' + trip + ' .selected').forEach(el => el.classList.remove('selected'));
+  document.getElementById('prog-' + trip).style.width = '0%';
+  document.getElementById('form-' + trip).classList.remove('hidden');
+  document.getElementById('res-' + trip).classList.remove('active');
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
