@@ -499,6 +499,7 @@ function submitForm(trip) {
       ['Wish list', d.wish], ['Skip / concerns', d.skip]
     ];
     renderResults('tokyo', name, rows, 'badge-tokyo', 'result-sec-tokyo');
+    sendToFormspree('tokyo', name, rows);
     const txt = [`🗾 Tokyo Trip Intake — ${name}`, `─────────────────────────`, ...rows.map(([l,v]) => `${l}: ${v}`)].join('\n');
     document.getElementById('cBox-tokyo').textContent = txt;
     document.getElementById('form-tokyo').classList.add('hidden');
@@ -525,6 +526,7 @@ function submitForm(trip) {
       ['Dietary needs', d.diet], ['Activity level', d.activity], ['Wish list', d.wish], ['Skip / concerns', d.skip]
     ];
     renderResults('ph', name, rows, 'badge-ph', 'result-sec-ph');
+    sendToFormspree('ph', name, rows);
     const txt = [`🇵🇭 Philippines Trip Intake — ${name}`, `─────────────────────────`, ...rows.map(([l,v]) => `${l}: ${v}`)].join('\n');
     document.getElementById('cBox-ph').textContent = txt;
     document.getElementById('form-ph').classList.add('hidden');
@@ -539,6 +541,17 @@ function renderResults(trip, name, rows, badgeClass, secClass) {
     `<div class="result-sec ${secClass}"><h3>Your responses</h3>` +
     rows.map(([l,v]) => `<div class="result-row"><span class="r-label">${l}</span><span class="r-val">${v}</span></div>`).join('') +
     '</div>';
+}
+
+function sendToFormspree(trip, name, rows) {
+  const tripName = trip === 'tokyo' ? 'Tokyo' : 'Philippines';
+  const data = { trip: tripName, name: name };
+  rows.forEach(([l, v]) => { data[l] = v; });
+  fetch('https://formspree.io/f/xpqkpzwr', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(data)
+  }).catch(() => {});
 }
 
 function copyText(trip) {
